@@ -39,7 +39,7 @@ def hoax_signal_score(text: str) -> tuple[float, list[str]]:
     # 2) conspiracy-ish phrasing
     conspiracy = ["they don't want you to know", "they dont want you to know", "cover up", "hidden truth"]
     if any(p in tl for p in conspiracy):
-        cues.append("Conspiracy-style phrasing detected (e.g., “they don’t want you to know”).")
+        cues.append("Conspiracy-style phrasing detected (e.g., 'they don't want you to know').")
 
     # 3) sensational adjectives
     sensational = ["shocking", "exposed", "unbelievable", "mind-blowing", "secret"]
@@ -422,37 +422,35 @@ if analyze_btn:
         else:
             st.error(f"🔴 High Risk (Confidence: {overall_conf:.1f}%)")
 
-# -------------------
-# Why it may be risky (REPLACE YOUR WHOLE SECTION WITH THIS)
-# -------------------
-st.markdown("### Why it may be risky")
+        # -------------------
+        # Why it may be risky (REPLACE YOUR WHOLE SECTION WITH THIS)
+        # -------------------
+        st.markdown("### Why it may be risky")
 
-reasons = []
+        reasons = []
 
-# Claim explanations
-if claim and claim.strip():
-    reasons.append(f"• Claim risk = 0.35×ML + 0.65×Heuristics → {claim_score:.2f}")
-    reasons.append(f"  - ML credibility score (LIAR-trained): {ml_score:.2f}")
-    reasons.append(f"  - Hoax-signal score (writing style): {heur_score:.2f}")
+        # Claim explanations
+        if claim and claim.strip():
+            reasons.append(f"• Claim risk = 0.35×ML + 0.65×Heuristics → {claim_score:.2f}")
+            reasons.append(f"  - ML credibility score (LIAR-trained): {ml_score:.2f}")
+            reasons.append(f"  - Hoax-signal score (writing style): {heur_score:.2f}")
 
-    reasons.append(f"• Hoax-signal cues triggered ({len(heur_cues)}/8):")
-    for c in heur_cues:
-        reasons.append(f"  - {c}")
-else:
-    reasons.append("• No claim text provided, so claim-based cues are skipped.")
+            reasons.append(f"• Hoax-signal cues triggered ({len(heur_cues)}/8):")
+            for c in heur_cues:
+                reasons.append(f"  - {c}")
+        else:
+            reasons.append("• No claim text provided, so claim-based cues are skipped.")
 
-# Media explanations
-if image_obj is not None and media_reasons:
-    reasons.append("• Media analysis notes:")
-    for mr in media_reasons:
-        reasons.append(f"  - {mr}")
+        # Media explanations
+        if image_obj is not None and media_reasons:
+            reasons.append("• Media analysis notes:")
+            for mr in media_reasons:
+                reasons.append(f"  - {mr}")
 
-# Display
-with st.expander("Why it may be risky (details)", expanded=True):
-    for r in reasons:
-        st.write(r)
-
-
+        # Display
+        with st.expander("Why it may be risky (details)", expanded=True):
+            for r in reasons:
+                st.write(r)
 
         st.subheader("Verify-before-share checklist")
         checklist_items = [
@@ -461,31 +459,36 @@ with st.expander("Why it may be risky (details)", expanded=True):
             "Look for the original upload date and full context.",
             "If the post is urgent/emotional, pause — this is a common hoax tactic.",
             "If it shows a person/event, look for other reliable clips/photos of the same moment.",
-            "Ask a trusted adult/teacher if you’re unsure.",
+            "Ask a trusted adult/teacher if you're unsure.",
         ]
-        for item in checklist_items:
-            st.checkbox(item, value=False, disabled=True)
+        for i, item in enumerate(checklist_items):
+            st.checkbox(
+                item,
+                value=False,
+                disabled=True,
+                key=f"verify_checklist_{i}"
+            )
 
-        st.info("Tip: VeriTeen estimates risk. It doesn’t prove something is real or fake. Always verify before sharing.")
+        st.info("Tip: VeriTeen estimates risk. It doesn't prove something is real or fake. Always verify before sharing.")
 
-report_text = build_report(
-    claim=claim,
-    claim_level=claim_level,
-    claim_score=claim_score,
-    ml_score=ml_score,
-    heur_score=heur_score,
-    heur_cues=heur_cues,
-    media_level=media_level,
-    media_score=media_score,
-    media_reasons=media_reasons,
-    overall_level=overall_level,
-    overall_score=overall_score,
-    overall_conf=overall_conf,
-)
+        report_text = build_report(
+            claim=claim,
+            claim_level=claim_level,
+            claim_score=claim_score,
+            ml_score=ml_score,
+            heur_score=heur_score,
+            heur_cues=heur_cues,
+            media_level=media_level,
+            media_score=media_score,
+            media_reasons=media_reasons,
+            overall_level=overall_level,
+            overall_score=overall_score,
+            overall_conf=overall_conf,
+        )
 
-st.download_button(
-    label="⬇️ Download analysis report (TXT)",
-    data=report_text,
-    file_name="veriteen_report.txt",
-    mime="text/plain",
-)
+        st.download_button(
+            label="⬇️ Download analysis report (TXT)",
+            data=report_text,
+            file_name="veriteen_report.txt",
+            mime="text/plain",
+        )
