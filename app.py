@@ -27,6 +27,17 @@ def hoax_signal_score(text: str) -> float:
     sensational = ["shocking", "exposed", "unbelievable", "mind-blowing", "secret"]
     cues += sum(2 for w in sensational if w in t)
 
+    # Unverified / vague attribution
+    unverified_patterns = [
+        "claims that",
+        "said this",
+        "no source",
+        "people say",
+        "it is said",
+        "reportedly"
+    ]
+    cues += sum(2 for p in unverified_patterns if p in t)
+
     # Punctuation / ALL CAPS
     if text.count("!") >= 2 or text.count("?") >= 2:
         cues += 2
@@ -50,6 +61,10 @@ def hoax_signal_score(text: str) -> float:
     # Force Medium if very suspicious keywords
     if any(w in t for w in high_risk_words) and score < 0.45:
         score = 0.45
+
+    # If text mentions claims or sources but score is very low, force Medium
+    if any(p in t for p in ["claims", "no source", "reportedly"]) and score < 0.25:
+        score = 0.25
 
     return score
 
